@@ -23,6 +23,7 @@ If Rc < 0 Then
   Printl("Connect failed")
 Else
   NnSocketRec.SockSetsockoptStr(Socket, $NN_SUB, $NN_SUB_SUBSCRIBE, lpszSubscribe)
+  
   While %TRUE
     NnSocketRec.SockRecv(Socket, VarPtr(lpszRecvBuffer), SizeOf(lpszRecvBuffer), 0)
     Printl(lpszRecvBuffer)

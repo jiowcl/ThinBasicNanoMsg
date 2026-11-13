@@ -17,21 +17,26 @@ If NngInitDefault() <> $NNG_OK Then
   Printl("nng_init failed: " & NngStrerrorString(NngLastErr))
 Else
   Rc = NngSub0Open(sock)
+
   If Rc <> $NNG_OK Then
     Printl("sub open failed: " & NngStrerrorString(Rc))
   Else
     Rc = NngDialDefault(sock, "tcp://127.0.0.1:1700", 0)
+
     If Rc <> $NNG_OK Then
       Printl("dial failed: " & NngStrerrorString(Rc))
     Else
       topic = "quotes"
       Rc = NngSub0Subscribe(sock, topic)
+
       If Rc <> $NNG_OK Then
         Printl("subscribe failed: " & NngStrerrorString(Rc))
       Else
         Printl("Subscribed to ""quotes"" on tcp://127.0.0.1:1700 (start PubServer first)")
+
         While %TRUE
           n = NngRecvBuffer(sock, VarPtr(buf), SizeOf(buf), 0)
+          
           If n >= 0 Then
             Printl(Left$(buf, n))
           Else
@@ -43,6 +48,7 @@ Else
       End If
     End If
   End If
+
   NngSocketClose(sock)
   NngFini()
 End If

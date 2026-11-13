@@ -18,10 +18,12 @@ Else
     Printl("pub open failed: " & NngStrerrorString(Rc))
   Else
     Rc = NngListenDefault(sock, "tcp://0.0.0.0:1700", 0)
+
     If Rc <> $NNG_OK Then
       Printl("listen failed: " & NngStrerrorString(Rc))
     Else
       Printl("PUB listening on tcp://0.0.0.0:1700")
+      
       While %TRUE
         Rc = NngSendString(sock, "quotes#tick", 0)
         If Rc = $NNG_OK Then Printl("Published: quotes#tick")
@@ -29,6 +31,7 @@ Else
       Wend
     End If
   End If
+
   NngSocketClose(sock)
   NngFini()
 End If

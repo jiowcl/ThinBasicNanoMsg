@@ -84,6 +84,79 @@ ThinBasicNNG\SDK\C\build_pelles.bat
 
 CI uses i686 MinGW: `build_mingw_ci.bat` (no `thinCore.lib`). Install artifacts to `C:\thinBasic\Lib\`.
 
+## Example  
+
+NanoMsg Publisher Server
+
+```thinbasic
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NanomsgWrapper.inc"
+
+Function RndRange(ByVal first As Double, ByVal last As Double) As Double
+  Function = Rnd * (last - first) + first
+End Function
+
+Dim NnRuntime As LibNanomsgRuntime
+Dim NnSocketRec As LibNanomsgSocket
+Global Socket As Long
+Global lpszServerAddr As String
+Global lpszSendMessage As String
+Global Rc As Long
+
+lpszServerAddr = "tcp://*:1700"
+Socket = NnSocketRec.NewSocket($AF_SP, $NN_PUB)
+Rc = NnSocketRec.SockBind(Socket, lpszServerAddr)
+
+If Rc < 0 Then
+  Printl("Bind failed: " & NnRuntime.GetStrerror(NnRuntime.GetErrno()))
+Else
+  Printl("Bind an IP address: " & lpszServerAddr)
+  Randomize
+  
+  While %TRUE
+    lpszSendMessage = "quotes#Bid:" & Str$(Int(RndRange(1000, 9000))) & ",Ask:" & Str$(Int(RndRange(1000, 9000)))
+
+    If NnSocketRec.SockSendStr(Socket, lpszSendMessage, 0) >= 0 Then
+      Printl("Published: " & lpszSendMessage)
+    End If
+
+    Sleep 500
+  Wend
+End If
+```
+
+NanoMsg Subscribe Client
+
+```thinbasic
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NanomsgWrapper.inc"
+
+Dim NnSocketRec As LibNanomsgSocket
+Global Socket As Long
+Global lpszServerAddr As String
+Global lpszSubscribe As String
+Global lpszRecvBuffer As Asciiz * 256
+Global Rc As Long
+
+lpszServerAddr = "tcp://localhost:1700"
+lpszSubscribe = "quotes"
+Socket = NnSocketRec.NewSocket($AF_SP, $NN_SUB)
+Rc = NnSocketRec.SockConnect(Socket, lpszServerAddr)
+
+If Rc < 0 Then
+  Printl("Connect failed")
+Else
+  NnSocketRec.SockSetsockoptStr(Socket, $NN_SUB, $NN_SUB_SUBSCRIBE, lpszSubscribe)
+  
+  While %TRUE
+    NnSocketRec.SockRecv(Socket, VarPtr(lpszRecvBuffer), SizeOf(lpszRecvBuffer), 0)
+    Printl(lpszRecvBuffer)
+  Wend
+End If
+```
+
 ## License
 
 Copyright (c) 2019-2026 Ji-Feng Tsai.  

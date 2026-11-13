@@ -18,6 +18,7 @@ If NngInitDefault() <> $NNG_OK Then
   Printl("nng_init failed: " & NngStrerrorString(NngLastErr))
 Else
   Rc = NngSurveyor0Open(sock)
+  
   If Rc <> $NNG_OK Then
     Printl("surveyor open failed: " & NngStrerrorString(Rc))
   Else
@@ -25,21 +26,27 @@ Else
     If Rc <> $NNG_OK Then
       Printl("set survey-time failed: " & NngStrerrorString(Rc))
     End If
+
     Rc = NngListenDefault(sock, "tcp://0.0.0.0:1702", 0)
+
     If Rc <> $NNG_OK Then
       Printl("listen failed: " & NngStrerrorString(Rc))
     Else
       Printl("Surveyor listening on tcp://0.0.0.0:1702 (start RespondentClient)")
+
       While %TRUE
         lTotal = lTotal + 1
         lpszSurvey = "Survey #" & lTotal
         Rc = NngSendString(sock, lpszSurvey, 0)
+
         If Rc <> $NNG_OK Then
           Printl("send failed: " & NngStrerrorString(Rc))
         Else
           Printl("Survey sent: " & lpszSurvey)
+
           While %TRUE
             n = NngRecvBuffer(sock, VarPtr(buf), SizeOf(buf), 0)
+
             If n >= 0 Then
               Printl("Response: " & Left$(buf, n))
             Else
@@ -50,14 +57,17 @@ Else
               Else
                 Printl("Recv failed: " & NngStrerrorString(NngLastErr))
               End If
+
               Exit While
             End If
           Wend
         End If
+
         Sleep 1000
       Wend
     End If
   End If
+
   NngSocketClose(sock)
   NngFini()
 End If

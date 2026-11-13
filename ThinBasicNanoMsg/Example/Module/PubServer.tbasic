@@ -27,11 +27,14 @@ If Rc < 0 Then
 Else
   Printl("Bind an IP address: " & lpszServerAddr)
   Randomize
+  
   While %TRUE
     lpszSendMessage = "quotes#Bid:" & Str$(Int(RndRange(1000, 9000))) & ",Ask:" & Str$(Int(RndRange(1000, 9000)))
+
     If NnSocketRec.SockSendStr(Socket, lpszSendMessage, 0) >= 0 Then
       Printl("Published: " & lpszSendMessage)
     End If
+
     Sleep 500
   Wend
 End If

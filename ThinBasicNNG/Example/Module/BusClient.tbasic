@@ -44,6 +44,7 @@ Else
         lTotal = lTotal + 1
         lpszSendMessage = "From NngBusB #" & lTotal
         Rc = NngSock.SockSendStr(Socket, lpszSendMessage, 0)
+        
         If Rc <> $NNG_OK Then
           Printl("Send failed: " & NngRuntime.GetStrerror(Rc))
         Else

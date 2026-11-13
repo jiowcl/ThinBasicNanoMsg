@@ -16,16 +16,19 @@ If NngInitDefault() <> $NNG_OK Then
   Printl("nng_init failed: " & NngStrerrorString(NngLastErr))
 Else
   Rc = NngRespondent0Open(sock)
+  
   If Rc <> $NNG_OK Then
     Printl("respondent open failed: " & NngStrerrorString(Rc))
   Else
     Rc = NngDialDefault(sock, "tcp://127.0.0.1:1702", 0)
+
     If Rc <> $NNG_OK Then
       Printl("dial failed: " & NngStrerrorString(Rc))
     Else
       Printl("Respondent dialed tcp://127.0.0.1:1702 (waiting for surveys)")
       While %TRUE
         n = NngRecvBuffer(sock, VarPtr(buf), SizeOf(buf), 0)
+
         If n >= 0 Then
           Printl("Survey: " & Left$(buf, n))
           Rc = NngSendString(sock, "ack", 0)
@@ -40,6 +43,7 @@ Else
       Wend
     End If
   End If
+
   NngSocketClose(sock)
   NngFini()
 End If
