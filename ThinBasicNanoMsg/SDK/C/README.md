@@ -8,7 +8,17 @@ Builds `thinBasic_NanoMsg.dll` for `USES "NanoMsg"`.
 Output: `bin\thinBasic_NanoMsg.dll` — copy to `C:\thinBasic\Lib\`.  
 Runtime loads `nanomsg.dll` from the directory passed to `NnLibraryInit` (package `Library\x86`, not `thinBasic\Lib`).
 
-Smoke test: run `examples\NanoMsgSdkSmoke.tbasic` with `thinBasicc.exe` (resolves `..\..\..\Library\x86` from `examples\`).
+Examples (`examples\`, copy `bin\thinBasic_NanoMsg.dll` to `C:\thinBasic\Lib\`):
+
+| Script | Purpose |
+|--------|---------|
+| `SdkInitPath.inc` | Shared `SdkNanoMsgInit` / `SdkNanoMsgShutdown` |
+| `NanoMsgSdkSmoke.tbasic` | Load DLL + open socket |
+| `NanoMsgSdkPairInproc.tbasic` | PAIR inproc ping-pong (single process) |
+| `NanoMsgSdkReqRepServer.tbasic` | REP on `tcp://0.0.0.0:1700` |
+| `NanoMsgSdkReqRepClient.tbasic` | REQ to `tcp://127.0.0.1:1700` (run server first) |
+
+Run with `C:\thinBasic\thinBasicc.exe` and path to the `.tbasic` file.
 
 See repository root [README.md](../../../README.md) for native vs SDK comparison.
 

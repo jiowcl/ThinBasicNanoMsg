@@ -1,0 +1,55 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+' REQ/REP server (SDK). Copy thinBasic_NanoMsg.dll to C:\thinBasic\Lib\
+' Run before NanoMsgSdkReqRepClient.tbasic
+
+USES "CONSOLE"
+USES "NanoMsg"
+
+#INCLUDE Once "SdkInitPath.inc"
+
+Global sock As Long
+Global Rc As Long
+Global lTotal As Long
+Global lpszAddr As String
+Global lpszReq As String
+Global lpszReply As String
+
+If SdkNanoMsgInit() = 0 Then End
+
+lpszAddr = "tcp://0.0.0.0:1700"
+sock = NnSocket(%AF_SP, %NN_REP)
+If sock < 0 Then
+  Printl("NnSocket REP failed errno=" & NnErrno())
+  SdkNanoMsgShutdown()
+  End
+End If
+
+Rc = NnBind(sock, lpszAddr)
+If Rc < 0 Then
+  Printl("NnBind failed: " & NnStrerrorString(NnErrno()))
+  NnClose(sock)
+  SdkNanoMsgShutdown()
+  End
+End If
+
+Printl("REP listening: " & lpszAddr)
+lTotal = 0
+
+While %TRUE
+  lpszReq = NnRecvStr(sock, 256, 0)
+  If Len(lpszReq) = 0 And NnErrno() <> 0 Then
+    Printl("NnRecvStr failed: " & NnStrerrorString(NnErrno()))
+  Else
+    lTotal = lTotal + 1
+    Printl("Received #" & lTotal & ": " & lpszReq)
+    lpszReply = "Hi " & lTotal
+    Rc = NnSendStr(sock, lpszReply, 0)
+    If Rc < 0 Then
+      Printl("NnSendStr failed: " & NnStrerrorString(NnErrno()))
+    End If
+  End If
+Wend

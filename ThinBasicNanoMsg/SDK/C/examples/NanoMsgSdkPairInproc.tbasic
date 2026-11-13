@@ -1,0 +1,74 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+' PAIR inproc ping-pong (SDK). Exits when done — no second process.
+
+USES "CONSOLE"
+USES "NanoMsg"
+
+#INCLUDE Once "SdkInitPath.inc"
+
+Global sockA As Long
+Global sockB As Long
+Global Rc As Long
+Global ok As Long
+Global lpszAddr As String
+Global lpszMsg As String
+
+If SdkNanoMsgInit() = 0 Then End
+
+lpszAddr = "inproc://nanomsg-sdk-pair"
+ok = %TRUE
+
+sockA = NnSocket(%AF_SP, %NN_PAIR)
+sockB = NnSocket(%AF_SP, %NN_PAIR)
+If sockA < 0 Or sockB < 0 Then ok = %FALSE
+
+If ok Then
+  Rc = NnBind(sockA, lpszAddr)
+  If Rc < 0 Then ok = %FALSE
+End If
+If ok Then
+  Rc = NnConnect(sockB, lpszAddr)
+  If Rc < 0 Then ok = %FALSE
+End If
+
+Sleep 50
+
+If ok Then
+  Rc = NnSendStr(sockA, "ping", 0)
+  If Rc < 0 Then ok = %FALSE
+End If
+If ok Then
+  lpszMsg = NnRecvStr(sockB, 64, 0)
+  If Len(lpszMsg) = 0 Then
+    ok = %FALSE
+  Else
+    Printl("B received: " & lpszMsg)
+  End If
+End If
+
+If ok Then
+  Rc = NnSendStr(sockB, "pong", 0)
+  If Rc < 0 Then ok = %FALSE
+End If
+If ok Then
+  lpszMsg = NnRecvStr(sockA, 64, 0)
+  If Len(lpszMsg) = 0 Then
+    ok = %FALSE
+  Else
+    Printl("A received: " & lpszMsg)
+  End If
+End If
+
+If ok Then
+  Printl("NanoMsg SDK PAIR inproc OK")
+Else
+  Printl("NanoMsg SDK PAIR inproc FAILED errno=" & NnErrno())
+End If
+
+If sockA >= 0 Then NnClose(sockA)
+If sockB >= 0 Then NnClose(sockB)
+SdkNanoMsgShutdown()

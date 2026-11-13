@@ -1,0 +1,53 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+' REQ/REP client (SDK). Start NanoMsgSdkReqRepServer.tbasic first.
+
+USES "CONSOLE"
+USES "NanoMsg"
+
+#INCLUDE Once "SdkInitPath.inc"
+
+Global sock As Long
+Global Rc As Long
+Global lTotal As Long
+Global lpszAddr As String
+Global lpszSend As String
+Global lpszReply As String
+
+If SdkNanoMsgInit() = 0 Then End
+
+lpszAddr = "tcp://127.0.0.1:1700"
+sock = NnSocket(%AF_SP, %NN_REQ)
+If sock < 0 Then
+  Printl("NnSocket REQ failed errno=" & NnErrno())
+  SdkNanoMsgShutdown()
+  End
+End If
+
+Rc = NnConnect(sock, lpszAddr)
+If Rc < 0 Then
+  Printl("NnConnect failed: " & NnStrerrorString(NnErrno()))
+  Printl("Start NanoMsgSdkReqRepServer.tbasic first")
+  NnClose(sock)
+  SdkNanoMsgShutdown()
+  End
+End If
+
+Printl("REQ connected: " & lpszAddr)
+lTotal = 0
+
+While %TRUE
+  lTotal = lTotal + 1
+  lpszSend = "Hello " & lTotal
+  Rc = NnSendStr(sock, lpszSend, 0)
+  If Rc < 0 Then
+    Printl("NnSendStr failed: " & NnStrerrorString(NnErrno()))
+  Else
+    lpszReply = NnRecvStr(sock, 256, 0)
+    Printl("Reply: " & lpszReply)
+  End If
+  Sleep 500
+Wend

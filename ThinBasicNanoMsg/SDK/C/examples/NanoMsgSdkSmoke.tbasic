@@ -9,34 +9,22 @@
 USES "CONSOLE"
 USES "NanoMsg"
 
-Global libPath As String
-Global ok As Long
+#INCLUDE Once "SdkInitPath.inc"
+
 Global s As Long
 
 Printl("NanoMsg SDK smoke")
 Printl("APP_SourcePath=" & APP_SourcePath)
 
-libPath = APP_SourcePath & "..\..\..\Library\x86"
-ok = NnLibraryInit(libPath)
+If SdkNanoMsgInit() = 0 Then End
 
-If ok = 0 Then
-  libPath = APP_SourcePath & "..\..\Library\x86"
-  ok = NnLibraryInit(libPath)
-End If
-
-If ok = 0 Then
-  Printl("NnLibraryInit failed")
-  Printl("Last path tried: " & libPath)
-  Printl("Expected: ...\ThinBasicNanoMsg\Library\x86\nanomsg.dll")
+Printl("NnLibraryLoaded: " & NnLibraryLoaded())
+s = NnSocket(%AF_SP, %NN_PAIR)
+If s < 0 Then
+  Printl("NnSocket failed errno=" & NnErrno())
 Else
-  Printl("NnLibraryLoaded: " & NnLibraryLoaded())
-  s = NnSocket(%AF_SP, %NN_PAIR)
-  If s < 0 Then
-    Printl("NnSocket failed errno=" & NnErrno())
-  Else
-    Printl("socket=" & s & " errno=" & NnErrno())
-    NnClose(s)
-  End If
-  NnLibraryShutdown()
-  Printl("NanoMsg SDK smoke OK")
+  Printl("socket=" & s & " errno=" & NnErrno())
+  NnClose(s)
 End If
+SdkNanoMsgShutdown()
+Printl("NanoMsg SDK smoke OK")
