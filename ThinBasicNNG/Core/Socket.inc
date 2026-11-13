@@ -236,14 +236,33 @@ Function NngDialDefault(ByVal sock As Long, ByVal addr As String, ByVal flags As
   Function = NngDial(sock, addr, 0, flags)
 End Function
 
+' <summary>
+' NngSetRecvTimeoutMs
+' </summary>
+' <param name="lSock">Long</param>
+' <param name="lMs">Long</param>
+' <returns>Returns long.</returns>
 Function NngSetRecvTimeoutMs(ByVal lSock As Long, ByVal lMs As Long) As Long
   Function = NngSocketSetMs(lSock, "recv-timeout", lMs)
 End Function
 
+' <summary>
+' NngSetSurveyTimeMs
+' </summary>
+' <param name="lSock">Long</param>
+' <param name="lMs">Long</param>
+' <returns>Returns long.</returns>
 Function NngSetSurveyTimeMs(ByVal lSock As Long, ByVal lMs As Long) As Long
   Function = NngSocketSetMs(lSock, "surveyor:survey-time", lMs)
 End Function
 
+' <summary>
+' NngSetOptMs
+' </summary>
+' <param name="lSock">Long</param>
+' <param name="opt">String</param>
+' <param name="optval">Long</param>
+' <returns>Returns long.</returns>
 Function NngSetOptMs(ByVal lSock As Long, ByVal opt As String, ByVal optval As Long) As Long
   Function = NngSocketSetMs(lSock, opt, optval)
 End Function
