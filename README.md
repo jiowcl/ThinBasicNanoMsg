@@ -16,7 +16,7 @@
 
 ThinBasic runs as a **32-bit** process, so only **x86** DLLs in each package `Library\x86` can be loaded. Do not use `Library\x64` builds from sibling FreeBasicNanoMsg/PureBasicNanoMsg repos. TCP and other network transports still interoperate with x64 peers.
 
-## Repository layout
+## Package layout
 
 ```thinbasic
 ThinBasicNanoMsg/
@@ -35,25 +35,7 @@ ThinBasicNanoMsg/
 └── .github/workflows/ci.yml
 ```
 
-## Native vs ThinBasic SDK  
-
-| | Native (`Core\*.inc`) | SDK (`USES "NanoMsg"` / `USES "NNG"`) |
-|--|----------------------|----------------------------------------|
-| Coverage | Full procedural + Type wrappers | Core subset (socket, bind/connect, send/recv, errno, library init) |
-| DLL load | `LibPath.inc` sets process CWD → `Library\x86` | `NnLibraryInit(path)` / `NngLibraryInit(path)` in C module |
-| Build | None (includes only) | `SDK\C\build_pelles.bat` or `build_mingw_ci.bat` |
-| Constants | `$NN_*` / `$NNG_*` in `Enums.inc` | `%NN_*` / `%NNG_*` registered by the module |
-
-Do not mix `#INCLUDE` Core files with `USES "NanoMsg"` or `USES "NNG"` in the same script.
-
-Typical includes:
-
-```vb
-#INCLUDE Once ".\Core\NanoMsg.inc"
-#INCLUDE Once ".\Core\NanomsgWrapper.inc"
-```
-
-## Examples  
+Samples:
 
 | Pattern | NanoMsg | NNG |
 |--------|---------|-----|
@@ -72,6 +54,24 @@ Default TCP ports follow the FreeBasic/PureBasic ports: **1700** (pub/sub, req/r
 | Type wrapper | `Example\Module\BusServer.tbasic`, `BusClient.tbasic` | same under `ThinBasicNNG\Example\Module\` |
 
 NanoMsg bus samples use `NnPoll` + `$NN_POLLIN` (idle send every 500 ms). NNG bus samples use `recv-timeout` (`nng_socket_set_ms`) and treat `$NNG_ETIMEDOUT` as idle.
+
+## Native vs ThinBasic SDK  
+
+| | Native (`Core\*.inc`) | SDK (`USES "NanoMsg"` / `USES "NNG"`) |
+|--|----------------------|----------------------------------------|
+| Coverage | Full procedural + Type wrappers | Core subset (socket, bind/connect, send/recv, errno, library init) |
+| DLL load | `LibPath.inc` sets process CWD → `Library\x86` | `NnLibraryInit(path)` / `NngLibraryInit(path)` in C module |
+| Build | None (includes only) | `SDK\C\build_pelles.bat` or `build_mingw_ci.bat` |
+| Constants | `$NN_*` / `$NNG_*` in `Enums.inc` | `%NN_*` / `%NNG_*` registered by the module |
+
+Do not mix `#INCLUDE` Core files with `USES "NanoMsg"` or `USES "NNG"` in the same script.
+
+Typical includes:
+
+```vb
+#INCLUDE Once ".\Core\NanoMsg.inc"
+#INCLUDE Once ".\Core\NanomsgWrapper.inc"
+```
 
 ## How to build SDK modules  
 
