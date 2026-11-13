@@ -10,6 +10,10 @@
 *.obj
 *.a
 *.lib
-SDK/C/build/
-SDK/C/bin/
-SDK/C/lib/thinCore_pelles.lib
+ThinBasicNanoMsg/SDK/C/build/
+ThinBasicNanoMsg/SDK/C/bin/
+ThinBasicNanoMsg/SDK/C/lib/thinCore_pelles.lib
+
+ThinBasicNNG/SDK/C/build/
+ThinBasicNNG/SDK/C/bin/
+ThinBasicNNG/SDK/C/lib/thinCore_pelles.lib
