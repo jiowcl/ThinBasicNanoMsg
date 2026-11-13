@@ -19,7 +19,7 @@ typedef int (__cdecl *nng_dial_fn)(unsigned sock, const char *addr, void *dialer
 typedef int (__cdecl *nng_send_fn)(unsigned sock, const void *buf, size_t len, int flags);
 typedef int (__cdecl *nng_recv_fn)(unsigned sock, void *buf, size_t *len, int flags);
 typedef int (__cdecl *nng_close_fn)(unsigned sock);
-typedef int (__cdecl *nng_sub_subscribe_fn)(unsigned sock, const char *topic);
+typedef int (__cdecl *nng_sub_subscribe_fn)(unsigned sock, const void *topic, size_t len);
 typedef const char *(__cdecl *nng_strerror_fn)(int err);
 
 /**
@@ -243,8 +243,14 @@ int nng_api_close(unsigned sock) {
  * @param topic The topic to subscribe to.
  * @return 0 if the socket is not subscribed to.
  */
-int nng_api_subscribe(unsigned sock, const char *topic) { 
-    return g_nng.loaded && g_nng.subscribe ? g_nng.subscribe(sock, topic) : -1; 
+int nng_api_subscribe(unsigned sock, const char *topic) {
+    size_t len;
+    if (!g_nng.loaded || !g_nng.subscribe)
+        return -1;
+    if (!topic)
+        return -1;
+    len = strlen(topic);
+    return g_nng.subscribe(sock, topic, len);
 }
 
 /**

@@ -1,0 +1,48 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+USES "NNG"
+
+#INCLUDE Once "SdkInitPath.inc"
+
+Global sock As Long
+Global Rc As Long
+Global lTotal As Long
+Global lpszAddr As String
+Global lpszMsg As String
+
+If SdkNngInit() = 0 Then End
+
+lpszAddr = "tcp://0.0.0.0:1700"
+sock = NngPub0Open()
+If sock <= 0 Then
+  Printl("NngPub0Open failed")
+  SdkNngShutdown()
+  End
+End If
+
+Rc = NngListen(sock, lpszAddr, 0)
+If Rc <> %NNG_OK Then
+  Printl("NngListen failed: " & NngStrerrorString(Rc))
+  NngClose(sock)
+  SdkNngShutdown()
+  End
+End If
+
+Printl("PUB listening: " & lpszAddr)
+lTotal = 0
+
+While %TRUE
+  lTotal = lTotal + 1
+  lpszMsg = "quotes#tick"
+  Rc = NngSendStr(sock, lpszMsg, 0)
+  If Rc <> %NNG_OK Then
+    Printl("NngSendStr failed: " & NngStrerrorString(Rc))
+  Else
+    Printl("Published: " & lpszMsg)
+  End If
+  Sleep 500
+Wend

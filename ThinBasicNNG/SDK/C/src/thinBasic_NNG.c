@@ -56,16 +56,34 @@ LONG __cdecl Exec_NngRep0Open(void);
 LONG __cdecl Exec_NngReq0Open(void);
 
 /**
+ * @brief Get the last error from the NNG library.
+ * @return The last error.
+ */
+LONG __cdecl Exec_NngLastErr(void);
+
+/**
  * @brief Open a PUB socket.
  * @return 0 if the socket is not opened.
  */
 LONG __cdecl Exec_NngPub0Open(void);
 
 /**
+ * @brief Open a SUB socket.
+ * @return 0 if the socket is not opened.
+ */
+LONG __cdecl Exec_NngSub0Open(void);
+
+/**
  * @brief Subscribe to a NNG socket.
  * @return 0 if the socket is not subscribed to.
  */
-LONG __cdecl Exec_NngSub0Open(void);
+LONG __cdecl Exec_NngSub0Subscribe(void);
+
+/**
+ * @brief Receive a message from a NNG socket.
+ * @return The message.
+ */
+void * __stdcall Exec_NngRecvStr(void);
 
 /**
  * @brief Listen for a NNG socket.
@@ -120,13 +138,18 @@ static void tb_nng_register_symbols(void)
     tb_nng_reg("NngLibraryInit", thinBasic_ReturnCodeLong, &Exec_NngLibraryInit);
     tb_nng_reg("NngLibraryShutdown", thinBasic_ReturnCodeLong, &Exec_NngLibraryShutdown);
     tb_nng_reg("NngLibraryLoaded", thinBasic_ReturnCodeLong, &Exec_NngLibraryLoaded);
+    tb_nng_reg("NngLastErr", thinBasic_ReturnCodeLong, &Exec_NngLastErr);
     tb_nng_reg("NngStrerror", thinBasic_ReturnCodeLong, &Exec_NngStrerror);
     tb_LoadSymbolFB("NngStrerrorString", thinBasic_ReturnString, (void *)&Exec_NngStrerrorString, thinBasic_ForceOverWrite);
     tb_nng_reg("NngRep0Open", thinBasic_ReturnCodeLong, &Exec_NngRep0Open);
     tb_nng_reg("NngReq0Open", thinBasic_ReturnCodeLong, &Exec_NngReq0Open);
+    tb_nng_reg("NngPub0Open", thinBasic_ReturnCodeLong, &Exec_NngPub0Open);
+    tb_nng_reg("NngSub0Open", thinBasic_ReturnCodeLong, &Exec_NngSub0Open);
+    tb_nng_reg("NngSubscribe", thinBasic_ReturnCodeLong, &Exec_NngSub0Subscribe);
     tb_nng_reg("NngListen", thinBasic_ReturnCodeLong, &Exec_NngListen);
     tb_nng_reg("NngDial", thinBasic_ReturnCodeLong, &Exec_NngDial);
     tb_nng_reg("NngSendStr", thinBasic_ReturnCodeLong, &Exec_NngSendStr);
+    tb_LoadSymbolFB("NngRecvStr", thinBasic_ReturnString, (void *)&Exec_NngRecvStr, thinBasic_ForceOverWrite);
     tb_nng_reg("NngClose", thinBasic_ReturnCodeLong, &Exec_NngClose);
 }
 
@@ -136,6 +159,7 @@ static void tb_nng_register_symbols(void)
 static void tb_nng_register_equates(void)
 {
     tb_nng_equate("%NNG_OK", NNG_OK);
+    tb_nng_equate("%NNG_ETIMEDOUT", NNG_ETIMEDOUT);
     tb_nng_equate("%NNG_FLAG_NONBLOCK", NNG_FLAG_NONBLOCK);
 }
 

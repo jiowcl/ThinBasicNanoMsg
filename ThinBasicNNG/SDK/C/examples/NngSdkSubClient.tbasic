@@ -1,0 +1,56 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+USES "NNG"
+
+#INCLUDE Once "SdkInitPath.inc"
+
+Global sock As Long
+Global Rc As Long
+Global lpszAddr As String
+Global lpszTopic As String
+Global lpszMsg As String
+
+If SdkNngInit() = 0 Then End
+
+lpszAddr = "tcp://127.0.0.1:1700"
+sock = NngSub0Open()
+If sock <= 0 Then
+  Printl("NngSub0Open failed")
+  SdkNngShutdown()
+  End
+End If
+
+Rc = NngDial(sock, lpszAddr, 0)
+If Rc <> %NNG_OK Then
+  Printl("NngDial failed: " & NngStrerrorString(Rc))
+  Printl("Start NngSdkPubServer.tbasic first")
+  NngClose(sock)
+  SdkNngShutdown()
+  End
+End If
+
+lpszTopic = "quotes"
+Rc = NngSubscribe(sock, lpszTopic)
+If Rc <> %NNG_OK Then
+  Printl("NngSubscribe failed: " & NngStrerrorString(Rc))
+  NngClose(sock)
+  SdkNngShutdown()
+  End
+End If
+
+Printl("SUB subscribed to """ & lpszTopic & """ on " & lpszAddr)
+
+While %TRUE
+  lpszMsg = NngRecvStr(sock, 256, 0)
+  If Len(lpszMsg) > 0 Then
+    Printl(lpszMsg)
+  ElseIf NngLastErr() <> %NNG_OK Then
+    If Not SdkNngErrTimedOut(NngLastErr()) Then
+      Printl("NngRecvStr: " & NngStrerrorString(NngLastErr()))
+    End If
+  End If
+Wend

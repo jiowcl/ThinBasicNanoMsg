@@ -8,7 +8,16 @@ Builds `thinBasic_NNG.dll` for `USES "NNG"`.
 Output: `bin\thinBasic_NNG.dll` — copy to `C:\thinBasic\Lib\`.  
 `NngLibraryInit` loads `nng.dll` from the path you pass (package `Library\x86`) and calls `nng_init`.
 
-Smoke test: `examples\NngSdkSmoke.tbasic`.
+Examples (`examples\`, copy `bin\thinBasic_NNG.dll` to `C:\thinBasic\Lib\`):
+
+| Script | Purpose |
+|--------|---------|
+| `SdkInitPath.inc` | `SdkNngInit` / `SdkNngShutdown` / `SdkNngErrTimedOut` |
+| `NngSdkSmoke.tbasic` | Load + `NngRep0Open` |
+| `NngSdkReqRepServer.tbasic` / `NngSdkReqRepClient.tbasic` | REQ/REP on port 1700 |
+| `NngSdkPubServer.tbasic` / `NngSdkSubClient.tbasic` | PUB/SUB + `NngSubscribe` |
+
+SDK keywords (layer 2+): `NngRecvStr`, `NngPub0Open`, `NngSub0Open`, `NngSubscribe`, `NngLastErr`, `%NNG_ETIMEDOUT`.
 
 See repository root [README.md](../../../README.md).  
 

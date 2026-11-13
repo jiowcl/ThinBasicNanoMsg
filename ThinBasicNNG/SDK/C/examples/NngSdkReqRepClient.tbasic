@@ -1,0 +1,55 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+USES "NNG"
+
+#INCLUDE Once "SdkInitPath.inc"
+
+Global sock As Long
+Global Rc As Long
+Global lTotal As Long
+Global lpszAddr As String
+Global lpszSend As String
+Global lpszReply As String
+
+If SdkNngInit() = 0 Then End
+
+lpszAddr = "tcp://127.0.0.1:1700"
+sock = NngReq0Open()
+If sock <= 0 Then
+  Printl("NngReq0Open failed")
+  SdkNngShutdown()
+  End
+End If
+
+Rc = NngDial(sock, lpszAddr, 0)
+If Rc <> %NNG_OK Then
+  Printl("NngDial failed: " & NngStrerrorString(Rc))
+  Printl("Start NngSdkReqRepServer.tbasic first")
+  NngClose(sock)
+  SdkNngShutdown()
+  End
+End If
+
+Printl("REQ dialed: " & lpszAddr)
+lTotal = 0
+
+While %TRUE
+  lTotal = lTotal + 1
+  lpszSend = "Hello " & lTotal
+  Rc = NngSendStr(sock, lpszSend, 0)
+  If Rc <> %NNG_OK Then
+    Printl("NngSendStr failed: " & NngStrerrorString(Rc))
+  Else
+    lpszReply = NngRecvStr(sock, 256, 0)
+    If Len(lpszReply) = 0 And NngLastErr() <> %NNG_OK Then
+      Printl("NngRecvStr failed: " & NngStrerrorString(NngLastErr()))
+    Else
+      Printl("Reply: " & lpszReply)
+    End If
+  End If
+  Sleep 500
+Wend

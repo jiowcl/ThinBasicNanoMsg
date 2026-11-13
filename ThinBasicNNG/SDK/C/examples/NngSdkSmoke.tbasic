@@ -4,41 +4,26 @@
 '--------------------------------------------------------------------------------------------
 
 ' Prerequisite: copy SDK\C\bin\thinBasic_NNG.dll to C:\thinBasic\Lib\
-' NngLibraryInit loads nng.dll from ThinBasicNNG\Library\x86 (not from thinBasic\Lib).
 
 USES "CONSOLE"
 USES "NNG"
 
-Global libPath As String
-Global ok As Long
+#INCLUDE Once "SdkInitPath.inc"
+
 Global s As Long
 
 Printl("NNG SDK smoke")
 Printl("APP_SourcePath=" & APP_SourcePath)
 
-libPath = APP_SourcePath & "..\..\..\Library\x86"
-ok = NngLibraryInit(libPath)
+If SdkNngInit() = 0 Then End
 
-If ok = 0 Then
-  libPath = APP_SourcePath & "..\..\Library\x86"
-  ok = NngLibraryInit(libPath)
-End If
-
-If ok = 0 Then
-  Printl("NngLibraryInit failed")
-  Printl("Last path tried: " & libPath)
-  Printl("Expected: ...\ThinBasicNNG\Library\x86\nng.dll")
+Printl("NngLibraryLoaded: " & NngLibraryLoaded())
+s = NngRep0Open()
+If s <= 0 Then
+  Printl("NngRep0Open failed")
 Else
-  Printl("NngLibraryLoaded: " & NngLibraryLoaded())
-  s = NngRep0Open()
-  
-  If s <= 0 Then
-    Printl("NngRep0Open failed")
-  Else
-    Printl("rep socket=" & s)
-    NngClose(s)
-  End If
-  
-  NngLibraryShutdown()
-  Printl("NNG SDK smoke OK")
+  Printl("rep socket=" & s)
+  NngClose(s)
 End If
+SdkNngShutdown()
+Printl("NNG SDK smoke OK")

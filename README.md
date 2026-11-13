@@ -59,7 +59,7 @@ NanoMsg bus samples use `NnPoll` + `$NN_POLLIN` (idle send every 500 ms). NNG bu
 
 | | Native (`Core\*.inc`) | SDK (`USES "NanoMsg"` / `USES "NNG"`) |
 |--|----------------------|----------------------------------------|
-| Coverage | Full procedural + Type wrappers | Core subset (socket, bind/connect, send/recv, errno, library init) |
+| Coverage | Full procedural + Type wrappers | REQ/REP, PUB/SUB, listen/dial, send/recv strings (`SDK\C\examples\`) |
 | DLL load | `LibPath.inc` sets process CWD → `Library\x86` | `NnLibraryInit(path)` / `NngLibraryInit(path)` in C module |
 | Build | None (includes only) | `SDK\C\build_pelles.bat` or `build_mingw_ci.bat` |
 | Constants | `$NN_*` / `$NNG_*` in `Enums.inc` | `%NN_*` / `%NNG_*` registered by the module |
