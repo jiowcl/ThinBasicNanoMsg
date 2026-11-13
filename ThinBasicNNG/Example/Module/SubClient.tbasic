@@ -1,0 +1,50 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NngWrapper.inc"
+
+Dim NngRun As LibNngRuntime
+Dim NngSock As LibNngSocket
+Global sock As Long
+Global buf As Asciiz * 256
+Global n As Long
+Global Rc As Long
+Global topic As String
+
+If NngRun.DoInit() <> $NNG_OK Then
+  Printl("nng_init failed: " & NngRun.GetStrerror(NngRun.GetLastError()))
+Else
+  Rc = NngSock.SubOpen(sock)
+  If Rc <> $NNG_OK Then
+    Printl("sub open failed: " & NngRun.GetStrerror(Rc))
+  Else
+    Rc = NngSock.SockDial(sock, "tcp://127.0.0.1:1700", 0)
+    If Rc <> $NNG_OK Then
+      Printl("dial failed: " & NngRun.GetStrerror(Rc))
+    Else
+      topic = "quotes"
+      Rc = NngSock.Subscribe(sock, topic)
+      If Rc <> $NNG_OK Then
+        Printl("subscribe failed: " & NngRun.GetStrerror(Rc))
+      Else
+        Printl("Subscribed to ""quotes"" on tcp://127.0.0.1:1700")
+        While %TRUE
+          n = NngSock.SockRecv(sock, VarPtr(buf), SizeOf(buf), 0)
+          If n >= 0 Then
+            Printl(Left$(buf, n))
+          Else
+            If Not NngRun.IsTimedOut(NngRun.GetLastError()) Then
+              Printl("recv: " & NngRun.GetStrerror(NngRun.GetLastError()))
+            End If
+          End If
+        Wend
+      End If
+    End If
+  End If
+  NngSock.SockClose(sock)
+  NngRun.DoFini()
+End If

@@ -1,0 +1,49 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\NanoMsg.inc"
+
+Global sockA As Long, sockB As Long, Rc As Long, ok As Long
+Global buf As Asciiz * 64
+Global n As Long
+Global lpszAddr As String
+
+lpszAddr = "inproc://tb-pair-smoke"
+ok = %TRUE
+sockA = NnSocket($AF_SP, $NN_PAIR)
+sockB = NnSocket($AF_SP, $NN_PAIR)
+If sockA < 0 Or sockB < 0 Then ok = %FALSE
+If ok Then
+  If NnBind(sockA, lpszAddr) < 0 Then ok = %FALSE
+  If NnConnect(sockB, lpszAddr) < 0 Then ok = %FALSE
+End If
+Sleep 50
+If ok And NnSendString(sockA, "ping", 0) < 0 Then ok = %FALSE
+If ok Then
+  n = NnRecv(sockB, VarPtr(buf), SizeOf(buf), 0)
+  If n < 0 Then
+    ok = %FALSE
+  Else
+    Printl("B received: " & Left$(buf, n))
+  End If
+End If
+If ok And NnSendString(sockB, "pong", 0) < 0 Then ok = %FALSE
+If ok Then
+  n = NnRecv(sockA, VarPtr(buf), SizeOf(buf), 0)
+  If n < 0 Then
+    ok = %FALSE
+  Else
+    Printl("A received: " & Left$(buf, n))
+  End If
+End If
+If ok Then
+  Printl("PAIR inproc smoke test OK.")
+Else
+  Printl("PAIR inproc smoke test FAILED.")
+End If
+If sockA >= 0 Then NnClose(sockA)
+If sockB >= 0 Then NnClose(sockB)

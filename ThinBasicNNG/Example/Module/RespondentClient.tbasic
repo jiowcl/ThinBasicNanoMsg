@@ -1,0 +1,47 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NngWrapper.inc"
+
+Dim NngRun As LibNngRuntime
+Dim NngSock As LibNngSocket
+Global sock As Long
+Global buf As Asciiz * 256
+Global n As Long
+Global Rc As Long
+
+If NngRun.DoInit() <> $NNG_OK Then
+  Printl("nng_init failed: " & NngRun.GetStrerror(NngRun.GetLastError()))
+Else
+  Rc = NngSock.RespondentOpen(sock)
+  If Rc <> $NNG_OK Then
+    Printl("respondent open failed: " & NngRun.GetStrerror(Rc))
+  Else
+    Rc = NngSock.SockDial(sock, "tcp://127.0.0.1:1702", 0)
+    If Rc <> $NNG_OK Then
+      Printl("dial failed: " & NngRun.GetStrerror(Rc))
+    Else
+      Printl("Respondent dialed tcp://127.0.0.1:1702 (start SurveyorServer first)")
+      While %TRUE
+        n = NngSock.SockRecv(sock, VarPtr(buf), SizeOf(buf), 0)
+        If n >= 0 Then
+          Printl("Survey: " & Left$(buf, n))
+          Rc = NngSock.SockSendStr(sock, "ack", 0)
+          If Rc <> $NNG_OK Then
+            Printl("send ack failed: " & NngRun.GetStrerror(Rc))
+          End If
+        Else
+          If Not NngRun.IsTimedOut(NngRun.GetLastError()) Then
+            Printl("recv: " & NngRun.GetStrerror(NngRun.GetLastError()))
+          End If
+        End If
+      Wend
+    End If
+  End If
+  NngSock.SockClose(sock)
+  NngRun.DoFini()
+End If

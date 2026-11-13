@@ -1,0 +1,22 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\NanoMsg.inc"
+
+Global Socket As Long
+Global buf As Asciiz * 256
+Global n As Long
+
+Socket = NnSocket($AF_SP, $NN_RESPONDENT)
+NnConnect(Socket, "tcp://localhost:1702")
+While %TRUE
+  n = NnRecv(Socket, VarPtr(buf), SizeOf(buf), 0)
+  If n >= 0 Then
+    Printl("Survey: " & Left$(buf, n))
+    NnSendString(Socket, "ack", 0)
+  End If
+Wend

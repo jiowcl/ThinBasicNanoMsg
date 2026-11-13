@@ -1,0 +1,24 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NngWrapper.inc"
+
+Dim NngRun As LibNngRuntime
+Dim NngSock As LibNngSocket
+Global sock As Long, buf As Asciiz * 256
+
+If NngRun.DoInit() <> $NNG_OK Then End
+
+NngSock.ReqOpen(sock)
+NngSock.SockDial(sock, "tcp://127.0.0.1:1700", 0)
+
+While %TRUE
+  NngSock.SockSendStr(sock, "Hello", 0)
+  NngSock.SockRecv(sock, VarPtr(buf), SizeOf(buf), 0)
+  Printl(buf)
+  Sleep 500
+Wend

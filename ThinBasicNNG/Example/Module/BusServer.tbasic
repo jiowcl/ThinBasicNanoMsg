@@ -1,0 +1,61 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NngWrapper.inc"
+
+Dim NngRuntime As LibNngRuntime
+Dim NngSock As LibNngSocket
+Global Socket As Long
+Global Rc As Long
+Global lTotal As Long
+Global lpszRecvBuffer As Asciiz * 256
+Global lpszSendMessage As String
+Global n As Long
+
+If NngRuntime.DoInit() <> $NNG_OK Then
+  Printl("nng_init failed: " & NngRuntime.GetStrerror(NngRuntime.GetLastError()))
+  End
+End If
+
+Rc = NngSock.BusOpen(Socket)
+
+If Rc <> $NNG_OK Then
+  Printl("Bus open failed: " & NngRuntime.GetStrerror(Rc))
+Else
+  Rc = NngSock.SockListen(Socket, "tcp://0.0.0.0:1703", 0)
+
+  If Rc <> $NNG_OK Then
+    Printl("Listen failed: " & NngRuntime.GetStrerror(Rc))
+  Else
+    NngSock.SockSetMs(Socket, "recv-timeout", 500)
+    Printl("Bus node A listening: tcp://0.0.0.0:1703")
+    lTotal = 0
+
+    While %TRUE
+      n = NngSock.SockRecv(Socket, VarPtr(lpszRecvBuffer), SizeOf(lpszRecvBuffer), 0)
+
+      If n >= 0 Then
+        Printl("Received: " & Left$(lpszRecvBuffer, n))
+      ElseIf NngRuntime.IsTimedOut(NngRuntime.GetLastError()) Then
+        lTotal = lTotal + 1
+        lpszSendMessage = "From NngBusA #" & lTotal
+        Rc = NngSock.SockSendStr(Socket, lpszSendMessage, 0)
+        
+        If Rc <> $NNG_OK Then
+          Printl("Send failed: " & NngRuntime.GetStrerror(Rc))
+        Else
+          Printl("Sent: " & lpszSendMessage)
+        End If
+      Else
+        Printl("Recv failed: " & NngRuntime.GetStrerror(NngRuntime.GetLastError()))
+      End If
+    Wend
+  End If
+End If
+
+NngSock.SockClose(Socket)
+NngRuntime.DoFini()

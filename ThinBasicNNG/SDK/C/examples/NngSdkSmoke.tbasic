@@ -1,0 +1,44 @@
+﻿'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+' Prerequisite: copy SDK\C\bin\thinBasic_NNG.dll to C:\thinBasic\Lib\
+' NngLibraryInit loads nng.dll from ThinBasicNNG\Library\x86 (not from thinBasic\Lib).
+
+USES "CONSOLE"
+USES "NNG"
+
+Global libPath As String
+Global ok As Long
+Global s As Long
+
+Printl("NNG SDK smoke")
+Printl("APP_SourcePath=" & APP_SourcePath)
+
+libPath = APP_SourcePath & "..\..\..\Library\x86"
+ok = NngLibraryInit(libPath)
+
+If ok = 0 Then
+  libPath = APP_SourcePath & "..\..\Library\x86"
+  ok = NngLibraryInit(libPath)
+End If
+
+If ok = 0 Then
+  Printl("NngLibraryInit failed")
+  Printl("Last path tried: " & libPath)
+  Printl("Expected: ...\ThinBasicNNG\Library\x86\nng.dll")
+Else
+  Printl("NngLibraryLoaded: " & NngLibraryLoaded())
+  s = NngRep0Open()
+  
+  If s <= 0 Then
+    Printl("NngRep0Open failed")
+  Else
+    Printl("rep socket=" & s)
+    NngClose(s)
+  End If
+  
+  NngLibraryShutdown()
+  Printl("NNG SDK smoke OK")
+End If

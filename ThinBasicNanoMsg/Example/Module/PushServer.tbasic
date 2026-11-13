@@ -1,0 +1,26 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NanomsgWrapper.inc"
+
+Dim NnSocketRec As LibNanomsgSocket
+Global Socket As Long
+Global msg As String
+Global Rc As Long
+
+Socket = NnSocketRec.NewSocket($AF_SP, $NN_PUSH)
+Rc = NnSocketRec.SockBind(Socket, "tcp://*:1701")
+
+If Rc < 0 Then
+  Printl("Bind failed")
+Else
+  While %TRUE
+    msg = "job"
+    NnSocketRec.SockSendStr(Socket, msg, 0)
+    Sleep 200
+  Wend
+End If

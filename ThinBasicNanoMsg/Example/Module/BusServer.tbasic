@@ -1,0 +1,54 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NanomsgWrapper.inc"
+
+Dim NnRuntime As LibNanomsgRuntime
+Dim NnSocketRec As LibNanomsgSocket
+Global Socket As Long
+Global Rc As Long
+Global lTotal As Long
+Global lpszRecvBuffer As Asciiz * 256
+Global lpszSendMessage As String
+Global n As Long
+Global fds As NnPollFd
+
+Socket = NnSocketRec.NewSocket($AF_SP, $NN_BUS)
+Rc = NnSocketRec.SockBind(Socket, "tcp://*:1703")
+
+If Rc < 0 Then
+  Printl("Bind failed: " & NnRuntime.GetStrerror(NnRuntime.GetErrno()))
+Else
+  Printl("Bus node A bound: tcp://*:1703")
+  lTotal = 0
+
+  While %TRUE
+    fds.fd = Socket
+    fds.events = $NN_POLLIN
+    fds.revents = 0
+    Rc = NnSocketRec.DoPoll(VarPtr(fds), 1, 500)
+
+    If Rc < 0 Then
+      Printl("Poll failed: " & NnRuntime.GetStrerror(NnRuntime.GetErrno()))
+    ElseIf Rc > 0 And (fds.revents And $NN_POLLIN) Then
+      n = NnSocketRec.SockRecv(Socket, VarPtr(lpszRecvBuffer), SizeOf(lpszRecvBuffer), 0)
+      If n >= 0 Then
+        Printl("Received: " & Left$(lpszRecvBuffer, n))
+      Else
+        Printl("Recv failed: " & NnRuntime.GetStrerror(NnRuntime.GetErrno()))
+      End If
+    Else
+      lTotal = lTotal + 1
+      lpszSendMessage = "From BusA #" & lTotal
+      If NnSocketRec.SockSendStr(Socket, lpszSendMessage, 0) < 0 Then
+        Printl("Send failed: " & NnRuntime.GetStrerror(NnRuntime.GetErrno()))
+      Else
+        Printl("Sent: " & lpszSendMessage)
+      End If
+    End If
+  Wend
+End If

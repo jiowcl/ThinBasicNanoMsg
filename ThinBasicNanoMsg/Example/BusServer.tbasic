@@ -1,0 +1,55 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+' NN_BUS node A: bind tcp://*:1703, poll for inbound, broadcast on idle timeouts.
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\NanoMsg.inc"
+
+Global lpszServerAddr As String
+Global Socket As Long
+Global Rc As Long
+Global lTotal As Long
+Global lpszRecvBuffer As Asciiz * 256
+Global lpszSendMessage As String
+Global n As Long
+Global fds As NnPollFd
+
+lpszServerAddr = "tcp://*:1703"
+Socket = NnSocket($AF_SP, $NN_BUS)
+Rc = NnBind(Socket, lpszServerAddr)
+
+If Rc < 0 Then
+  Printl("Bind failed: " & NnStrerrorString(NnErrno()))
+Else
+  Printl("Bus node A bound: " & lpszServerAddr)
+  lTotal = 0
+
+  While %TRUE
+    fds.fd = Socket
+    fds.events = $NN_POLLIN
+    fds.revents = 0
+    Rc = NnPoll(VarPtr(fds), 1, 500)
+
+    If Rc < 0 Then
+      Printl("Poll failed: " & NnStrerrorString(NnErrno()))
+    ElseIf Rc > 0 And (fds.revents And $NN_POLLIN) Then
+      n = NnRecv(Socket, VarPtr(lpszRecvBuffer), SizeOf(lpszRecvBuffer), 0)
+      If n >= 0 Then
+        Printl("Received: " & Left$(lpszRecvBuffer, n))
+      Else
+        Printl("Recv failed: " & NnStrerrorString(NnErrno()))
+      End If
+    Else
+      lTotal = lTotal + 1
+      lpszSendMessage = "From BusA #" & lTotal
+      If NnSendString(Socket, lpszSendMessage, 0) < 0 Then
+        Printl("Send failed: " & NnStrerrorString(NnErrno()))
+      Else
+        Printl("Sent: " & lpszSendMessage)
+      End If
+    End If
+  Wend
+End If

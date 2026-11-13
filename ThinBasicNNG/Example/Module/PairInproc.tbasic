@@ -1,0 +1,28 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NngWrapper.inc"
+
+Dim NngRun As LibNngRuntime
+Dim NngSock As LibNngSocket
+Global a As Long, b As Long, buf As Asciiz * 64, n As Long
+
+If NngRun.DoInit() <> $NNG_OK Then End
+
+NngSock.PairOpen(a)
+NngSock.PairOpen(b)
+NngSock.SockListen(a, "inproc://nng-pair", 0)
+NngSock.SockDial(b, "inproc://nng-pair", 0)
+
+Sleep 50
+
+NngSock.SockSendStr(a, "ping", 0)
+
+n = NngSock.SockRecv(b, VarPtr(buf), SizeOf(buf), 0)
+Printl Left$(buf, n)
+
+NngRun.DoFini()

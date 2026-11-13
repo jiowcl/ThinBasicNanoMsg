@@ -1,0 +1,36 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NngWrapper.inc"
+
+Dim NngRun As LibNngRuntime
+Dim NngSock As LibNngSocket
+Global sock As Long
+Global Rc As Long
+
+If NngRun.DoInit() <> $NNG_OK Then
+  Printl("nng_init failed: " & NngRun.GetStrerror(NngRun.GetLastError()))
+Else
+  Rc = NngSock.PubOpen(sock)
+  If Rc <> $NNG_OK Then
+    Printl("pub open failed: " & NngRun.GetStrerror(Rc))
+  Else
+    Rc = NngSock.SockListen(sock, "tcp://0.0.0.0:1700", 0)
+    If Rc <> $NNG_OK Then
+      Printl("listen failed: " & NngRun.GetStrerror(Rc))
+    Else
+      Printl("PUB listening on tcp://0.0.0.0:1700")
+      While %TRUE
+        Rc = NngSock.SockSendStr(sock, "quotes#tick", 0)
+        If Rc = $NNG_OK Then Printl("Published: quotes#tick")
+        Sleep 500
+      Wend
+    End If
+  End If
+  NngSock.SockClose(sock)
+  NngRun.DoFini()
+End If

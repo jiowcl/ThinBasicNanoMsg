@@ -1,0 +1,18 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+#INCLUDE Once "..\\Core\\Nng.inc"
+
+If NngInitDefault() <> $NNG_OK Then End
+
+Global sock As Long
+NngPush0Open(sock)
+NngListenDefault(sock, "tcp://0.0.0.0:1701", 0)
+
+While %TRUE
+  NngSendString(sock, "job", 0)
+  Sleep 200
+Wend

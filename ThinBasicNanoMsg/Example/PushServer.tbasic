@@ -1,0 +1,19 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\NanoMsg.inc"
+
+Global Socket As Long
+Global msg As String
+
+Socket = NnSocket($AF_SP, $NN_PUSH)
+NnBind(Socket, "tcp://*:1701")
+While %TRUE
+  msg = "job"
+  NnSendString(Socket, msg, 0)
+  Sleep 200
+Wend

@@ -1,0 +1,33 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\Nng.inc"
+
+If NngInitDefault() <> $NNG_OK Then End
+
+Global a As Long, b As Long, buf As Asciiz * 64, n As Long
+
+NngPair1Open(a)
+NngPair1Open(b)
+NngListenDefault(a, "inproc://nng-pair", 0)
+NngDialDefault(b, "inproc://nng-pair", 0)
+
+Sleep 50
+
+NngSendString(a, "ping", 0)
+
+n = NngRecvBuffer(b, VarPtr(buf), SizeOf(buf), 0)
+Printl Left$(buf, n)
+
+NngSendString(b, "pong", 0)
+
+n = NngRecvBuffer(a, VarPtr(buf), SizeOf(buf), 0)
+Printl Left$(buf, n)
+
+NngSocketClose(a)
+NngSocketClose(b)
+NngFini()

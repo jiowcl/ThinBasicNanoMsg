@@ -1,0 +1,27 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NanomsgWrapper.inc"
+
+Dim NnSocketRec As LibNanomsgSocket
+Global Socket As Long
+Global lpszServerAddr As String
+Global buf As Asciiz * 64
+Global Rc As Long
+
+lpszServerAddr = "tcp://localhost:1701"
+Socket = NnSocketRec.NewSocket($AF_SP, $NN_PULL)
+Rc = NnSocketRec.SockConnect(Socket, lpszServerAddr)
+
+If Rc < 0 Then
+  Printl("Connect failed")
+Else
+  While %TRUE
+    NnSocketRec.SockRecv(Socket, VarPtr(buf), SizeOf(buf), 0)
+    Printl(buf)
+  Wend
+End If

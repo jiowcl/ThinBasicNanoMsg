@@ -1,0 +1,28 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NanomsgWrapper.inc"
+
+Dim NnSocketRec As LibNanomsgSocket
+Global Socket As Long, buf As Asciiz * 256, recvRc As Long, lTotal As Long
+Socket = NnSocketRec.NewSocket($AF_SP, $NN_SURVEYOR)
+NnSocketRec.SockSetsockoptInt(Socket, $NN_SURVEYOR, $NN_SURVEYOR_DEADLINE, 2000)
+NnSocketRec.SockBind(Socket, "tcp://*:1702")
+While %TRUE
+  lTotal = lTotal + 1
+  If NnSocketRec.SockSendStr(Socket, "Survey #" & lTotal, 0) >= 0 Then
+    While %TRUE
+      recvRc = NnSocketRec.SockRecv(Socket, VarPtr(buf), SizeOf(buf), 0)
+      If recvRc >= 0 Then
+        Printl(Left$(buf, recvRc))
+      Else
+        Exit While
+      End If
+    Wend
+  End If
+  Sleep 1000
+Wend

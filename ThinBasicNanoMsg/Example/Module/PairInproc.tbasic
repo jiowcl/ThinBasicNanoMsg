@@ -1,0 +1,37 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NanomsgWrapper.inc"
+
+Dim NnSocketRec As LibNanomsgSocket
+Global sockA As Long, sockB As Long, ok As Long, buf As Asciiz * 64, n As Long
+Global lpszAddr As String
+lpszAddr = "inproc://tb-pair-smoke"
+ok = %TRUE
+sockA = NnSocketRec.NewSocket($AF_SP, $NN_PAIR)
+sockB = NnSocketRec.NewSocket($AF_SP, $NN_PAIR)
+If ok Then
+  If NnSocketRec.SockBind(sockA, lpszAddr) < 0 Then ok = %FALSE
+  If NnSocketRec.SockConnect(sockB, lpszAddr) < 0 Then ok = %FALSE
+End If
+Sleep 50
+If ok Then NnSocketRec.SockSendStr(sockA, "ping", 0)
+If ok Then
+  n = NnSocketRec.SockRecv(sockB, VarPtr(buf), SizeOf(buf), 0)
+  If n < 0 Then
+    ok = %FALSE
+  Else
+    Printl("B received: " & Left$(buf, n))
+  End If
+End If
+If ok Then
+  Printl("PAIR inproc smoke test OK.")
+Else
+  Printl("PAIR inproc smoke test FAILED.")
+End If
+If sockA >= 0 Then NnSocketRec.SockClose(sockA)
+If sockB >= 0 Then NnSocketRec.SockClose(sockB)

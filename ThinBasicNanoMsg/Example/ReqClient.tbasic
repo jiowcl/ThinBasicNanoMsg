@@ -1,0 +1,25 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\NanoMsg.inc"
+
+Global lpszServerAddr As String
+Global Socket As Long
+Global lpszSendMessage As String
+Global lpszRecvBuffer As Asciiz * 64
+
+lpszServerAddr = "tcp://localhost:1700"
+Socket = NnSocket($AF_SP, $NN_REQ)
+NnConnect(Socket, lpszServerAddr)
+
+While %TRUE
+  lpszSendMessage = "Hello"
+  NnSend(Socket, StrPtr(lpszSendMessage), Len(lpszSendMessage), 0)
+  NnRecv(Socket, VarPtr(lpszRecvBuffer), SizeOf(lpszRecvBuffer), 0)
+  Printl(lpszRecvBuffer)
+  Sleep 500
+Wend

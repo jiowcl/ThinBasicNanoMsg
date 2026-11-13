@@ -1,0 +1,19 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+#INCLUDE Once "..\\Core\\Nng.inc"
+
+If NngInitDefault() <> $NNG_OK Then End
+
+Global sock As Long, buf As Asciiz * 64
+
+NngPull0Open(sock)
+NngDialDefault(sock, "tcp://127.0.0.1:1701", 0)
+
+While %TRUE
+  NngRecvBuffer(sock, VarPtr(buf), SizeOf(buf), 0)
+  Printl(buf)
+Wend

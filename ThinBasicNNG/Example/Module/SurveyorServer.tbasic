@@ -1,0 +1,57 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NngWrapper.inc"
+
+Dim NngRun As LibNngRuntime
+Dim NngSock As LibNngSocket
+Global sock As Long
+Global buf As Asciiz * 256
+Global n As Long
+Global Rc As Long
+Global lTotal As Long
+Global lpszSurvey As String
+
+If NngRun.DoInit() <> $NNG_OK Then
+  Printl("nng_init failed: " & NngRun.GetStrerror(NngRun.GetLastError()))
+Else
+  Rc = NngSock.SurveyorOpen(sock)
+  If Rc <> $NNG_OK Then
+    Printl("surveyor open failed: " & NngRun.GetStrerror(Rc))
+  Else
+    NngSock.SockSetMs(sock, "surveyor:survey-time", 2000)
+    Rc = NngSock.SockListen(sock, "tcp://0.0.0.0:1702", 0)
+    If Rc <> $NNG_OK Then
+      Printl("listen failed: " & NngRun.GetStrerror(Rc))
+    Else
+      Printl("Surveyor listening on tcp://0.0.0.0:1702")
+      While %TRUE
+        lTotal = lTotal + 1
+        lpszSurvey = "Survey #" & lTotal
+        Rc = NngSock.SockSendStr(sock, lpszSurvey, 0)
+        If Rc = $NNG_OK Then
+          Printl("Survey sent: " & lpszSurvey)
+          While %TRUE
+            n = NngSock.SockRecv(sock, VarPtr(buf), SizeOf(buf), 0)
+            If n >= 0 Then
+              Printl("Response: " & Left$(buf, n))
+            Else
+              If NngRun.IsTimedOut(NngRun.GetLastError()) Then
+                Printl("Survey deadline reached.")
+              Else
+                Exit While
+              End If
+            End If
+          Wend
+        End If
+        Sleep 1000
+      Wend
+    End If
+  End If
+  NngSock.SockClose(sock)
+  NngRun.DoFini()
+End If

@@ -1,0 +1,18 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\NanoMsg.inc"
+
+Global Socket As Long
+Global buf As Asciiz * 64
+
+Socket = NnSocket($AF_SP, $NN_PULL)
+NnConnect(Socket, "tcp://localhost:1701")
+While %TRUE
+  NnRecv(Socket, VarPtr(buf), SizeOf(buf), 0)
+  Printl(buf)
+Wend

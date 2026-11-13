@@ -1,0 +1,26 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NanomsgWrapper.inc"
+
+Dim NnRuntime As LibNanomsgRuntime
+Dim NnSocketRec As LibNanomsgSocket
+Global Socket As Long, Rc As Long, lTotal As Long
+Global lpszRecvBuffer As Asciiz * 32
+Global lpszSendMessage As String
+
+Socket = NnSocketRec.NewSocket($AF_SP, $NN_REP)
+Rc = NnSocketRec.SockBind(Socket, "tcp://*:1700")
+Printl("Bind an IP address: tcp://*:1700")
+While %TRUE
+  lTotal = lTotal + 1
+  NnSocketRec.SockRecv(Socket, VarPtr(lpszRecvBuffer), SizeOf(lpszRecvBuffer), 0)
+  Sleep 2
+  Printl(lpszRecvBuffer)
+  lpszSendMessage = "Hi " & lTotal
+  NnSocketRec.SockSend(Socket, StrPtr(lpszSendMessage), Len(lpszSendMessage), 0)
+Wend

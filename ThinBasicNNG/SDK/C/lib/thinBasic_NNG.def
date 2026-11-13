@@ -1,0 +1,3 @@
+EXPORTS
+    _UnLoadLocalSymbols @ 1
+    _LoadLocalSymbols   @ 2

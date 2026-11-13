@@ -1,0 +1,62 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+' nng_bus0: listen on tcp://0.0.0.0:1703; recv-timeout drives periodic sends (no nn_poll).
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\Nng.inc"
+
+Global lpszServerAddr As String
+Global Socket As Long
+Global Rc As Long
+Global lTotal As Long
+Global lpszRecvBuffer As Asciiz * 256
+Global lpszSendMessage As String
+Global n As Long
+
+lpszServerAddr = "tcp://0.0.0.0:1703"
+
+If NngInitDefault() <> $NNG_OK Then
+  Printl("nng_init failed")
+Else
+  Rc = NngBus0Open(Socket)
+  
+  If Rc <> $NNG_OK Then
+    Printl("Bus open failed: " & NngStrerrorString(Rc))
+  Else
+    Rc = NngListenDefault(Socket, lpszServerAddr, 0)
+
+    If Rc <> $NNG_OK Then
+      Printl("Listen failed: " & NngStrerrorString(Rc))
+    Else
+      NngSocketSetMs(Socket, "recv-timeout", 500)
+      Printl("Bus node A listening: " & lpszServerAddr)
+      lTotal = 0
+
+      While %TRUE
+        n = NngRecvBuffer(Socket, VarPtr(lpszRecvBuffer), SizeOf(lpszRecvBuffer), 0)
+
+        If n >= 0 Then
+          Printl("Received: " & Left$(lpszRecvBuffer, n))
+        ElseIf NngErrIsTimedOut(NngLastErr) Then
+          lTotal = lTotal + 1
+          lpszSendMessage = "From NngBusA #" & lTotal
+          Rc = NngSendString(Socket, lpszSendMessage, 0)
+
+          If Rc <> $NNG_OK Then
+            Printl("Send failed: " & NngStrerrorString(Rc))
+          Else
+            Printl("Sent: " & lpszSendMessage)
+          End If
+        Else
+          Printl("Recv failed: " & NngStrerrorString(NngLastErr))
+        End If
+      Wend
+    End If
+  End If
+
+  NngSocketClose(Socket)
+  NngFini()
+End If

@@ -1,0 +1,25 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\Nng.inc"
+
+If NngInitDefault() <> $NNG_OK Then End
+
+Global sock As Long, Rc As Long, lTotal As Long
+Global buf As Asciiz * 32
+Global msg As String
+
+Rc = NngRep0Open(sock)
+Rc = NngListenDefault(sock, "tcp://0.0.0.0:1700", 0)
+Printl("Listen on address: tcp://0.0.0.0:1700")
+
+While %TRUE
+  lTotal = lTotal + 1
+  NngRecvBuffer(sock, VarPtr(buf), SizeOf(buf), 0)
+  msg = "Hi " & lTotal
+  NngSendString(sock, msg, 0)
+Wend

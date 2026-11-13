@@ -1,0 +1,37 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\NanoMsg.inc"
+
+Global Socket As Long
+Global lpszSurvey As String
+Global buf As Asciiz * 256
+Global recvRc As Long
+Global lTotal As Long
+
+Socket = NnSocket($AF_SP, $NN_SURVEYOR)
+NnSetsockoptInt(Socket, $NN_SURVEYOR, $NN_SURVEYOR_DEADLINE, 2000)
+NnBind(Socket, "tcp://*:1702")
+Printl("Bind an IP address: tcp://*:1702")
+
+While %TRUE
+  lTotal = lTotal + 1
+  lpszSurvey = "Survey #" & lTotal
+  If NnSendString(Socket, lpszSurvey, 0) >= 0 Then
+    Printl("Survey sent: " & lpszSurvey)
+    While %TRUE
+      recvRc = NnRecv(Socket, VarPtr(buf), SizeOf(buf), 0)
+      If recvRc >= 0 Then
+        Printl("Response: " & Left$(buf, recvRc))
+      Else
+        If NnErrno() = $ETIMEDOUT Then Printl("Survey deadline reached (ETIMEDOUT).")
+        Exit While
+      End If
+    Wend
+  End If
+  Sleep 1000
+Wend

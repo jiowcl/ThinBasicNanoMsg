@@ -1,0 +1,31 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\NanoMsg.inc"
+
+Global lpszServerAddr As String
+Global Socket As Long
+Global Rc As Long
+Global lTotal As Long
+Global lpszRecvBuffer As Asciiz * 32
+Global lpszSendMessage As String
+
+lpszServerAddr = "tcp://*:1700"
+Socket = NnSocket($AF_SP, $NN_REP)
+Rc = NnBind(Socket, lpszServerAddr)
+Printl("Bind an IP address: " & lpszServerAddr)
+
+lTotal = 0
+While %TRUE
+  lTotal = lTotal + 1
+  NnRecv(Socket, VarPtr(lpszRecvBuffer), SizeOf(lpszRecvBuffer), 0)
+  Sleep 2
+  Printl("Received: ")
+  Printl(lpszRecvBuffer)
+  lpszSendMessage = "Hi " & lTotal
+  NnSend(Socket, StrPtr(lpszSendMessage), Len(lpszSendMessage), 0)
+Wend

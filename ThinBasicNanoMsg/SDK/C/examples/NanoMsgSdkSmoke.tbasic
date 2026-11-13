@@ -1,0 +1,42 @@
+﻿'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+' Prerequisite: copy SDK\C\bin\thinBasic_NanoMsg.dll to C:\thinBasic\Lib\
+' NnLibraryInit loads nanomsg.dll from ThinBasicNanoMsg\Library\x86 (not from thinBasic\Lib).
+
+USES "CONSOLE"
+USES "NanoMsg"
+
+Global libPath As String
+Global ok As Long
+Global s As Long
+
+Printl("NanoMsg SDK smoke")
+Printl("APP_SourcePath=" & APP_SourcePath)
+
+libPath = APP_SourcePath & "..\..\..\Library\x86"
+ok = NnLibraryInit(libPath)
+
+If ok = 0 Then
+  libPath = APP_SourcePath & "..\..\Library\x86"
+  ok = NnLibraryInit(libPath)
+End If
+
+If ok = 0 Then
+  Printl("NnLibraryInit failed")
+  Printl("Last path tried: " & libPath)
+  Printl("Expected: ...\ThinBasicNanoMsg\Library\x86\nanomsg.dll")
+Else
+  Printl("NnLibraryLoaded: " & NnLibraryLoaded())
+  s = NnSocket(%AF_SP, %NN_PAIR)
+  If s < 0 Then
+    Printl("NnSocket failed errno=" & NnErrno())
+  Else
+    Printl("socket=" & s & " errno=" & NnErrno())
+    NnClose(s)
+  End If
+  NnLibraryShutdown()
+  Printl("NanoMsg SDK smoke OK")
+End If

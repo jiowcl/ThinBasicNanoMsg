@@ -1,0 +1,30 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\NanoMsg.inc"
+
+Function RndRange(ByVal first As Double, ByVal last As Double) As Double
+  Function = Rnd * (last - first) + first
+End Function
+
+Global lpszServerAddr As String
+Global Socket As Long
+Global lpszSendMessage As String
+
+lpszServerAddr = "tcp://*:1700"
+Socket = NnSocket($AF_SP, $NN_PUB)
+If NnBind(Socket, lpszServerAddr) < 0 Then
+  Printl("Bind failed: " & NnStrerrorString(NnErrno()))
+Else
+  Printl("Bind an IP address: " & lpszServerAddr)
+  Randomize
+  While %TRUE
+    lpszSendMessage = "quotes#Bid:" & Str$(Int(RndRange(1000, 9000))) & ",Ask:" & Str$(Int(RndRange(1000, 9000)))
+    If NnSendString(Socket, lpszSendMessage, 0) >= 0 Then Printl("Published: " & lpszSendMessage)
+    Sleep 500
+  Wend
+End If

@@ -1,0 +1,34 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\Core\Nng.inc"
+
+Global sock As Long
+Global Rc As Long
+
+If NngInitDefault() <> $NNG_OK Then
+  Printl("nng_init failed: " & NngStrerrorString(NngLastErr))
+Else
+  Rc = NngPub0Open(sock)
+  If Rc <> $NNG_OK Then
+    Printl("pub open failed: " & NngStrerrorString(Rc))
+  Else
+    Rc = NngListenDefault(sock, "tcp://0.0.0.0:1700", 0)
+    If Rc <> $NNG_OK Then
+      Printl("listen failed: " & NngStrerrorString(Rc))
+    Else
+      Printl("PUB listening on tcp://0.0.0.0:1700")
+      While %TRUE
+        Rc = NngSendString(sock, "quotes#tick", 0)
+        If Rc = $NNG_OK Then Printl("Published: quotes#tick")
+        Sleep 500
+      Wend
+    End If
+  End If
+  NngSocketClose(sock)
+  NngFini()
+End If

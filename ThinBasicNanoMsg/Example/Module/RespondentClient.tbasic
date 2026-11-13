@@ -1,0 +1,17 @@
+'--------------------------------------------------------------------------------------------
+'  Copyright (c) Ji-Feng Tsai. All rights reserved.
+'  Code released under the MIT license.
+'--------------------------------------------------------------------------------------------
+
+USES "CONSOLE"
+
+#INCLUDE Once "..\..\Core\NanomsgWrapper.inc"
+
+Dim NnSocketRec As LibNanomsgSocket
+Global Socket As Long, buf As Asciiz * 256, n As Long
+Socket = NnSocketRec.NewSocket($AF_SP, $NN_RESPONDENT)
+NnSocketRec.SockConnect(Socket, "tcp://localhost:1702")
+While %TRUE
+  n = NnSocketRec.SockRecv(Socket, VarPtr(buf), SizeOf(buf), 0)
+  If n >= 0 Then NnSocketRec.SockSendStr(Socket, "ack", 0)
+Wend
